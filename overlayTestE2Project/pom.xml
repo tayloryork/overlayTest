@@ -1,0 +1,155 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>co.tyec.overlayTest</groupId>
+		<artifactId>overlayTestParent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>overlayTestE2Project</artifactId>
+	<packaging>war</packaging>
+
+	<name>overlayTestE2Project</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jetty.version>9.2.0.M1</jetty.version>
+	</properties>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
+					<configuration>
+						<stopPort>9966</stopPort>
+						<stopKey>foo</stopKey>
+						<scanIntervalSeconds>1</scanIntervalSeconds>
+						<!-- <jettyXml>src/main/resources/jetty.xml</jettyXml> -->
+						<systemProperty>
+							<name>log4j.configuration</name>
+							<!-- have to use file:/// url since -->
+							<!-- Jetty is using classloader -->
+							<!-- before the webapp classloader is ready -->
+							<value>file:///${basedir}/src/main/resources/log4j.properties</value>
+						</systemProperty>
+					</configuration>
+				</plugin>
+
+
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.appfuse.plugins
+										</groupId>
+										<artifactId>
+											maven-warpath-plugin
+										</artifactId>
+										<versionRange>
+											[2.2.1,)
+										</versionRange>
+										<goals>
+											<goal>add-classes</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<!-- <plugin> <groupId>org.appfuse.plugins</groupId> <artifactId>maven-warpath-plugin</artifactId> 
+				<version>2.2.1</version> <extensions>true</extensions> <executions> <execution> 
+				<goals> <goal>add-classes</goal> </goals> </execution> </executions> <configuration> 
+				<dependentWarIncludes>**</dependentWarIncludes> </configuration> </plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<overlays>
+						<!-- How do overlays work? -->
+						<!-- It copies the first 'overlay' to the resulting webapp/war. -->
+						<!-- Then, it copes the second 'overlay'. If the second overlay has -->
+						<!-- a duplicate file as the first overlay, it will be IGNORED. -->
+						<!-- This is a 'first wins' strategy. -->
+						<!-- So, for this project to 'override' everything from overlayTestE2App -->
+						<!-- we need to put this project FIRST, then overlayTestE2App second -->
+						<overlay>
+							<!-- empty groupId/artifactId represents the current build -->
+							<!-- which is overlayTestE2Project -->
+						</overlay>
+						<overlay>
+							<groupId>co.tyec.overlayTest</groupId>
+							<artifactId>overlayTestE2App</artifactId>
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- The next two are a SET. The only difference is the 'type' -->
+		<!-- 'warpath' is used to add the war and it's dependencies to the classpath -->
+		<!-- 'war' is used for the overlay. -->
+		<!-- USE WARPATH FIRST -->
+		<!-- <dependency> <groupId>co.tyec.overlayTest</groupId> <artifactId>overlayTestE2App</artifactId> 
+			<version>0.0.1-SNAPSHOT</version> <type>warpath</type> </dependency> -->
+		<dependency>
+			<groupId>co.tyec.overlayTest</groupId>
+			<artifactId>overlayTestE2App</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>war</type>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>co.tyec.overlayTest</groupId>
+			<artifactId>overlayTestE2App</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<classifier>classes</classifier>
+			<!-- <scope>runtime</scope> -->
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+</project>
